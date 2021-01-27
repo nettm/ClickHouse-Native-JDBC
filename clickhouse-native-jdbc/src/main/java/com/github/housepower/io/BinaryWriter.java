@@ -12,37 +12,15 @@
  * limitations under the License.
  */
 
-package com.github.housepower.serde;
+package com.github.housepower.io;
 
-import io.netty.buffer.ByteBuf;
+public interface BinaryWriter extends AutoCloseable {
 
-import java.nio.charset.Charset;
+    void writeByte(byte byt);
 
-public interface BinarySerializer extends SupportCompress, AutoCloseable {
+    void writeBytes(byte[] bytes);
 
-    void writeBoolean(boolean b);
-
-    void writeByte(byte b);
-
-    void writeShortLE(short s);
-
-    void writeIntLE(int i);
-
-    void writeLongLE(long l);
-
-    void writeVarInt(long v);
-
-    void writeFloatLE(float f);
-
-    void writeDoubleLE(double d);
-
-    void writeBytes(ByteBuf bytes);
-
-    void writeUTF8Binary(CharSequence utf8);
-
-    void writeStringBinary(CharSequence seq, Charset charset);
-
-    void writeBytesBinary(ByteBuf bytes);
+    void writeBytes(byte[] bytes, int offset, int length);
 
     void flush(boolean force);
 

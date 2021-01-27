@@ -14,6 +14,7 @@
 
 package com.github.housepower.data;
 
+import com.github.housepower.io.ColumnWriterBuffer;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.BlockSettings.Setting;
 import com.github.housepower.misc.Validate;
@@ -37,8 +38,8 @@ public class Block {
         IColumn[] columns = new IColumn[columnCnt];
 
         for (int i = 0; i < columnCnt; i++) {
-            String name = deserializer.readUTF8StringBinary();
-            String type = deserializer.readUTF8StringBinary();
+            String name = deserializer.readUTF8Binary();
+            String type = deserializer.readUTF8Binary();
 
             IDataType dataType = DataTypeFactory.get(type, serverContext);
             Object[] arr = dataType.deserializeBinaryBulk(rowCnt, deserializer);

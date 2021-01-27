@@ -12,33 +12,13 @@
  * limitations under the License.
  */
 
-package com.github.housepower.serde;
+package com.github.housepower.io;
 
-import io.netty.buffer.ByteBuf;
+public interface BinaryReader extends AutoCloseable {
 
-public interface BinaryDeserializer extends SupportCompress, AutoCloseable {
+    int readByte();
 
-    boolean readBoolean();
-
-    byte readByte();
-
-    long readVarInt();
-
-    short readShortLE();
-
-    int readIntLE();
-
-    long readLongLE();
-
-    float readFloatLE();
-
-    double readDoubleLE();
-
-    ByteBuf readBytes(int size);
-
-    ByteBuf readBytesBinary();
-
-    String readUTF8Binary();
+    int readBytes(byte[] bytes);
 
     @Override
     default void close() {

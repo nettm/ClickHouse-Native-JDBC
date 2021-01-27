@@ -14,6 +14,7 @@
 
 package com.github.housepower.data;
 
+import com.github.housepower.io.ColumnWriterBuffer;
 import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.data.type.complex.DataTypeTuple;
 import com.github.housepower.serde.BinarySerializer;
@@ -47,8 +48,8 @@ public class ColumnTuple extends AbstractColumn {
     @Override
     public void flushToSerializer(BinarySerializer serializer, boolean now) throws SQLException, IOException {
         if (isExported()) {
-            serializer.writeUTF8StringBinary(name);
-            serializer.writeUTF8StringBinary(type.name());
+            serializer.writeUTF8Binary(name);
+            serializer.writeUTF8Binary(type.name());
         }
 
         // we should to flush all the nested data to serializer

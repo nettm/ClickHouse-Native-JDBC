@@ -12,35 +12,33 @@
  * limitations under the License.
  */
 
-package com.github.housepower.serde;
+package com.github.housepower.io;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.util.ReferenceCountUtil;
 
-public interface BinaryDeserializer extends SupportCompress, AutoCloseable {
+public class ByteBufBinaryReader implements BinaryReader {
 
-    boolean readBoolean();
+    private final ByteBuf buf;
 
-    byte readByte();
-
-    long readVarInt();
-
-    short readShortLE();
-
-    int readIntLE();
-
-    long readLongLE();
-
-    float readFloatLE();
-
-    double readDoubleLE();
-
-    ByteBuf readBytes(int size);
-
-    ByteBuf readBytesBinary();
-
-    String readUTF8Binary();
+    public ByteBufBinaryReader(ByteBuf buf) {
+        this.buf = buf;
+    }
 
     @Override
-    default void close() {
+    public int readByte() {
+        return buf.readUnsignedByte();
+    }
+
+    @Override
+    public int readBytes(byte[] bytes) {
+        int len = Math.min(buf.readableBytes(), bytes.length);
+        buf.readBytes(bytes, 0, len);
+        return len;
+    }
+
+    @Override
+    public void close() {
+        ReferenceCountUtil.safeRelease(buf);
     }
 }
