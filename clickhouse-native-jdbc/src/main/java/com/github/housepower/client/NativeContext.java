@@ -14,9 +14,13 @@
 
 package com.github.housepower.client;
 
+
+import com.github.housepower.misc.ByteBufHelper;
+import com.github.housepower.protocol.Encodable;
 import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -25,12 +29,12 @@ public class NativeContext {
 
     private final ClientContext clientCtx;
     private final ServerContext serverCtx;
-    private final NativeClient nativeClient;
+    private final NativeConnection nativeConn;
 
-    public NativeContext(ClientContext clientCtx, ServerContext serverCtx, NativeClient nativeClient) {
+    public NativeContext(ClientContext clientCtx, ServerContext serverCtx, NativeConnection nativeConn) {
         this.clientCtx = clientCtx;
         this.serverCtx = serverCtx;
-        this.nativeClient = nativeClient;
+        this.nativeConn = nativeConn;
     }
 
     public ClientContext clientCtx() {
@@ -41,11 +45,11 @@ public class NativeContext {
         return serverCtx;
     }
 
-    public NativeClient nativeClient() {
-        return nativeClient;
+    public NativeConnection nativeConn() {
+        return nativeConn;
     }
 
-    public static class ClientContext {
+    public static class ClientContext implements ByteBufHelper, Encodable {
         public static final int TCP_KINE = 1;
 
         public static final byte NO_QUERY = 0;
@@ -77,6 +81,22 @@ public class NativeContext {
             serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
             serializer.writeVarInt(ClickHouseDefines.CLIENT_REVISION);
             serializer.writeUTF8Binary("");
+        }
+
+        @Override
+        public void encode(ByteBuf buf) {
+            writeVarInt(buf, ClientContext.INITIAL_QUERY);
+            writeUTF8Binary(buf, "");
+            writeUTF8Binary(buf, "");
+            writeUTF8Binary(buf, initialAddress);
+            // for TCP kind
+            writeVarInt(buf, TCP_KINE);
+            writeUTF8Binary(buf, clientHostname);
+            writeUTF8Binary(buf, clientName);
+            writeVarInt(buf, ClickHouseDefines.MAJOR_VERSION);
+            writeVarInt(buf, ClickHouseDefines.MINOR_VERSION);
+            writeVarInt(buf, ClickHouseDefines.CLIENT_REVISION);
+            writeUTF8Binary(buf, "");
         }
     }
 

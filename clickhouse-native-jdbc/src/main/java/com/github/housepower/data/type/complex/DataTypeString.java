@@ -15,17 +15,20 @@
 package com.github.housepower.data.type.complex;
 
 import com.github.housepower.data.IDataType;
+import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
+import io.netty.util.AsciiString;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class DataTypeString implements IDataType<CharSequence, String> {
+public class DataTypeString implements IDataType<CharSequence, String>, ByteBufHelper {
 
     public static DataTypeCreator<CharSequence, String> CREATOR = (lexer, serverContext) -> new DataTypeString(serverContext.getConfigure().charset());
 
@@ -75,6 +78,15 @@ public class DataTypeString implements IDataType<CharSequence, String> {
         serializer.writeStringBinary(data, charset);
     }
 
+    @Override
+    public void encode(ByteBuf buf, CharSequence data) {
+        if (data instanceof AsciiString) {
+            buf.writeCharSequence(data, StandardCharsets.ISO_8859_1);
+        } else {
+            writeCharSeqBinary(buf, data, charset);
+        }
+    }
+
     /**
      * deserializeBinary will always returns String
      * for getBytes(idx) method, we encode the String again
@@ -83,6 +95,11 @@ public class DataTypeString implements IDataType<CharSequence, String> {
     public CharSequence deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         ByteBuf buf = deserializer.readBytesBinary();
         return buf.readCharSequence(buf.readableBytes(), charset);
+    }
+
+    @Override
+    public CharSequence decode(ByteBuf buf) {
+        return readCharSeqBinary(buf, charset);
     }
 
     @Override

@@ -18,6 +18,7 @@ import com.github.housepower.client.NativeContext;
 import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.serde.SettingType;
 import com.github.housepower.settings.SettingKey;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -84,5 +85,25 @@ public class QueryRequest implements Request {
         // empty data to server
         DataRequest.EMPTY.writeTo(serializer);
 
+    }
+
+    @Override
+    public void encode0(ByteBuf buf) {
+        writeUTF8Binary(buf, queryId);
+        clientContext.encode(buf);
+
+        for (Map.Entry<SettingKey, Serializable> entry : settings.entrySet()) {
+            writeUTF8Binary(buf, entry.getKey().name());
+            @SuppressWarnings("rawtypes")
+            SettingType type = entry.getKey().type();
+            //noinspection unchecked
+            type.encode(buf, entry.getValue());
+        }
+        writeUTF8Binary(buf, "");
+        writeVarInt(buf, stage);
+        buf.writeBoolean(compression);
+        writeUTF8Binary(buf, queryString);
+        // empty data to server
+        DataRequest.EMPTY.encode(buf);
     }
 }

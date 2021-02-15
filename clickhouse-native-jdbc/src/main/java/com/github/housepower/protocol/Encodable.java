@@ -14,24 +14,9 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinaryDeserializer;
 import io.netty.buffer.ByteBuf;
 
-public class EOFStreamResponse implements Response {
+public interface Encodable {
 
-    public static final EOFStreamResponse INSTANCE = new EOFStreamResponse();
-
-    @Deprecated
-    public static Response readFrom(BinaryDeserializer deserializer) {
-        return INSTANCE;
-    }
-
-    public static Response readFrom(ByteBuf buf) {
-        return INSTANCE;
-    }
-
-    @Override
-    public ProtoType type() {
-        return ProtoType.RESPONSE_END_OF_STREAM;
-    }
+    void encode(ByteBuf buf);
 }

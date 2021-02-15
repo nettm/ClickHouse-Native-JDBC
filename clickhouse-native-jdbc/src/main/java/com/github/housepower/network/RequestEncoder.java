@@ -12,26 +12,22 @@
  * limitations under the License.
  */
 
-package com.github.housepower.protocol;
+package com.github.housepower.network;
 
-import com.github.housepower.serde.BinaryDeserializer;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
+import com.github.housepower.protocol.Request;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToByteEncoder;
 
-public class EOFStreamResponse implements Response {
+public class RequestEncoder extends MessageToByteEncoder<Request> {
 
-    public static final EOFStreamResponse INSTANCE = new EOFStreamResponse();
-
-    @Deprecated
-    public static Response readFrom(BinaryDeserializer deserializer) {
-        return INSTANCE;
-    }
-
-    public static Response readFrom(ByteBuf buf) {
-        return INSTANCE;
-    }
+    private static final Logger log = LoggerFactory.getLogger(RequestEncoder.class);
 
     @Override
-    public ProtoType type() {
-        return ProtoType.RESPONSE_END_OF_STREAM;
+    protected void encode(ChannelHandlerContext ctx, Request msg, ByteBuf out) throws Exception {
+        msg.encode(out);
+        log.trace("send {}", msg.type());
     }
 }

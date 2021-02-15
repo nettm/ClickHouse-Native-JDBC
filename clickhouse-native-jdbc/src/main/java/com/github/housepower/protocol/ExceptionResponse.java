@@ -16,12 +16,14 @@ package com.github.housepower.protocol;
 
 import com.github.housepower.exception.ClickHouseSQLException;
 import com.github.housepower.serde.BinaryDeserializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 public class ExceptionResponse implements Response {
 
+    @Deprecated
     public static SQLException readExceptionFrom(BinaryDeserializer deserializer) throws IOException {
         int code = deserializer.readIntLE();
         String name = deserializer.readUTF8Binary();
@@ -31,6 +33,22 @@ public class ExceptionResponse implements Response {
         if (deserializer.readBoolean()) {
             return new ClickHouseSQLException(
                     code, name + message + ". Stack trace:\n\n" + stackTrace, readExceptionFrom(deserializer));
+        }
+
+        return new ClickHouseSQLException(code, name + message + ". Stack trace:\n\n" + stackTrace);
+    }
+
+    public static SQLException readExceptionFrom(ByteBuf buf) {
+        int code = buf.readIntLE();
+        String name = helper.readUTF8Binary(buf);
+        String message = helper.readUTF8Binary(buf);
+        String stackTrace = helper.readUTF8Binary(buf);
+
+        if (buf.readBoolean()) {
+            return new ClickHouseSQLException(
+                    code,
+                    name + message + ". Stack trace:\n\n" + stackTrace,
+                    readExceptionFrom(buf));
         }
 
         return new ClickHouseSQLException(code, name + message + ". Stack trace:\n\n" + stackTrace);

@@ -14,13 +14,14 @@
 
 package com.github.housepower.io;
 
+import com.github.housepower.protocol.Encodable;
 import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.serde.LegacyBinarySerializer;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
-public class ColumnWriterBuffer implements AutoCloseable {
+public class ColumnWriterBuffer implements Encodable, AutoCloseable {
 
     private final ByteBufBinaryWriter columnWriter;
 
@@ -31,9 +32,16 @@ public class ColumnWriterBuffer implements AutoCloseable {
         this.column = new LegacyBinarySerializer(columnWriter, false, null);
     }
 
+    @Deprecated
     public void writeTo(BinarySerializer serializer) throws IOException {
         ByteBuf buf = columnWriter.getBuf();
         serializer.writeBytes(buf);
+    }
+
+    @Override
+    public void encode(ByteBuf buf) {
+        ByteBuf buff = columnWriter.getBuf();
+        buf.writeBytes(buff);
     }
 
     @Override

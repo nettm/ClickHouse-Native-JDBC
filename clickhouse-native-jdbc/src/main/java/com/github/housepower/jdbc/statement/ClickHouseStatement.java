@@ -71,7 +71,6 @@ public class ClickHouseStatement implements SQLStatement {
 
     @Override
     public int executeUpdate(String query) throws SQLException {
-
         return ExceptionUtil.rethrowSQLException(() -> {
             cfg.settings().put(SettingKey.max_result_rows, maxRows);
             cfg.settings().put(SettingKey.result_overflow_mode, "break");
@@ -89,7 +88,7 @@ public class ClickHouseStatement implements SQLStatement {
                 return updateCount;
             }
             updateCount = -1;
-            QueryResult result = connection.sendQueryRequest(query, cfg);
+            QueryResult result = connection.sendQueryRequest(query, cfg.settings());
             lastResultSet = new ClickHouseResultSet(this, cfg, db, table, result.header(), result.data());
             return 0;
         });
