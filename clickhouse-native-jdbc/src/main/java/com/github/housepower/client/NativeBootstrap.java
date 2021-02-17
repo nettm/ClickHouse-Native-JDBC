@@ -16,17 +16,15 @@ package com.github.housepower.client;
 
 import com.github.housepower.exception.ClickHouseClientException;
 import com.github.housepower.misc.NettyUtil;
-import com.github.housepower.network.RequestEncoder;
-import com.github.housepower.network.ResponseDecoder;
-import com.github.housepower.network.ResponseHandler;
-import com.github.housepower.settings.ClickHouseConfig;
+import com.github.housepower.netty.RequestEncoder;
+import com.github.housepower.netty.ResponseDecoder;
+import com.github.housepower.netty.ResponseHandler;
 import com.github.housepower.settings.ClickHouseDefines;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.timeout.IdleStateHandler;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -34,7 +32,11 @@ import java.util.concurrent.TimeUnit;
 
 public class NativeBootstrap {
 
-    public static final NativeBootstrap INSTANCE = new NativeBootstrap();
+    public static final NativeBootstrap DEFAULT = new NativeBootstrap();
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(DEFAULT::stop));
+    }
 
     private final Bootstrap bootstrap;
     private final EventLoopGroup workerGroup;
@@ -56,21 +58,16 @@ public class NativeBootstrap {
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast("logging_handler", new LoggingHandler("packet", LogLevel.TRACE))
                                 .addLast("request_encoder", new RequestEncoder())
+                                // TODO move decode to thread pool since we can not detect full response
                                 .addLast("response_decoder", new ResponseDecoder())
-                                .addLast("response_handler", new ResponseHandler())
-                                .addLast("idle_state_handler", new IdleStateHandler(600, 600, 600));
+                                .addLast("response_handler", new ResponseHandler());
                     }
                 });
     }
 
-    public NativeContext createConnection(ClickHouseConfig cfg) {
-        Channel ch = connect(new InetSocketAddress(cfg.host(), cfg.port()));
-        NativeConnection conn = new NativeConnection(ch, cfg);
-        return conn.initChannel();
-    }
-
-    private Channel connect(SocketAddress address) {
+    public Channel connect(String host, int port) {
         Channel channel;
+        SocketAddress address = new InetSocketAddress(host, port);
         ChannelFuture f = this.bootstrap.connect(address);
         try {
             f.await(3000, TimeUnit.MILLISECONDS);

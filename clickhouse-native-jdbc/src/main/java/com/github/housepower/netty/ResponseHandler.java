@@ -12,12 +12,11 @@
  * limitations under the License.
  */
 
-package com.github.housepower.network;
+package com.github.housepower.netty;
 
 import com.github.housepower.exception.ClickHouseException;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.misc.ChannelHelper;
 import com.github.housepower.misc.ExceptionUtil;
 import com.github.housepower.protocol.ExceptionResponse;
 import com.github.housepower.protocol.Response;
@@ -29,7 +28,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class ResponseHandler extends SimpleChannelInboundHandler<Response> implements ChannelHelper {
 
-    private static final Logger log = LoggerFactory.getLogger(ResponseHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResponseHandler.class);
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Response response) throws Exception {
