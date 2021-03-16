@@ -93,7 +93,6 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
         return 0;
     }
 
-    @Override
     public void serializeBinary(CharSequence data, BinarySerializer serializer) throws SQLException, IOException {
         if (data instanceof AsciiString) {
             writeBytes(((AsciiString) data).toByteArray(), serializer);
@@ -143,7 +142,6 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
             throw new ClickHouseClientException("The size of FixString column is too large, got " + writeLen);
     }
 
-    @Override
     public CharSequence deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         ByteBuf buf = deserializer.readBytes(n);
         return buf.readCharSequence(n, charset);

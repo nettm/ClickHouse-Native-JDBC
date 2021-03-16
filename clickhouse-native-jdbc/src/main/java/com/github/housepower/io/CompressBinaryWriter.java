@@ -14,8 +14,8 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.CodecHelper;
 import com.github.housepower.misc.ClickHouseCityHash;
+import com.github.housepower.misc.CodecHelper;
 import io.airlift.compress.Compressor;
 
 import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;

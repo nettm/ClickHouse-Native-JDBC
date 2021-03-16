@@ -14,8 +14,6 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.io.ColumnWriterBuffer;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -35,21 +33,9 @@ public interface IColumn {
 
     void setBuf(ByteBuf buf);
 
-    /**
-     * Flush to socket output stream
-     *
-     * @param serializer is serializer wrapper of tcp socket
-     * @param now        means we should flush all the buffer to serializer now
-     */
-    @Deprecated
-    void flushToSerializer(BinarySerializer serializer, boolean now) throws IOException, SQLException;
-
     void flush(ByteBuf out, boolean flush);
 
     void clear();
-
-    @Deprecated
-    void setColumnWriterBuffer(ColumnWriterBuffer buffer);
 }
 
 

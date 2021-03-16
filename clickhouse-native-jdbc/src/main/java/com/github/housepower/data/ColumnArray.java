@@ -14,10 +14,8 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.io.ColumnWriterBuffer;
-import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.data.type.complex.DataTypeArray;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.jdbc.ClickHouseArray;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -48,23 +46,6 @@ public class ColumnArray extends AbstractColumn {
     }
 
     @Override
-    public void flushToSerializer(BinarySerializer serializer, boolean immediate) throws SQLException, IOException {
-        if (isExported()) {
-            serializer.writeUTF8Binary(name);
-            serializer.writeUTF8Binary(type.name());
-        }
-
-        for (long offsetList : offsets)
-            serializer.writeLongLE(offsetList);
-
-        data.flushToSerializer(serializer, false);
-
-        if (immediate) {
-            buffer.writeTo(serializer);
-        }
-    }
-
-    @Override
     public void flush(ByteBuf out, boolean flush) {
         if (isExported()) {
             writeUTF8Binary(out, name);
@@ -77,14 +58,8 @@ public class ColumnArray extends AbstractColumn {
         data.flush(out, false);
 
         if (flush) {
-            buffer.encode(out);
+            out.writeBytes(buf);
         }
-    }
-
-    @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
-        super.setColumnWriterBuffer(buffer);
-        data.setColumnWriterBuffer(buffer);
     }
 
     @Override

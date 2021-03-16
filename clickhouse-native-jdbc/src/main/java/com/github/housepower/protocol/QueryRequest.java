@@ -15,14 +15,10 @@
 package com.github.housepower.protocol;
 
 import com.github.housepower.client.NativeContext;
-import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.serde.SettingType;
 import com.github.housepower.settings.SettingKey;
 import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashMap;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -46,10 +42,6 @@ public class QueryRequest implements Request {
     private final NativeContext.ClientContext clientContext;
     private final Map<SettingKey, Serializable> settings;
 
-    public QueryRequest(String queryId, NativeContext.ClientContext clientContext, int stage, boolean compression, String queryString) {
-        this(queryId, clientContext, stage, compression, queryString, new HashMap<>());
-    }
-
     public QueryRequest(String queryId, NativeContext.ClientContext clientContext, int stage, boolean compression, String queryString,
                         Map<SettingKey, Serializable> settings) {
 
@@ -64,27 +56,6 @@ public class QueryRequest implements Request {
     @Override
     public ProtoType type() {
         return ProtoType.REQUEST_QUERY;
-    }
-
-    @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
-        serializer.writeUTF8Binary(queryId);
-        clientContext.writeTo(serializer);
-
-        for (Map.Entry<SettingKey, Serializable> entry : settings.entrySet()) {
-            serializer.writeUTF8Binary(entry.getKey().name());
-            @SuppressWarnings("rawtypes")
-            SettingType type = entry.getKey().type();
-            //noinspection unchecked
-            type.serializeSetting(serializer, entry.getValue());
-        }
-        serializer.writeUTF8Binary("");
-        serializer.writeVarInt(stage);
-        serializer.writeBoolean(compression);
-        serializer.writeUTF8Binary(queryString);
-        // empty data to server
-        DataRequest.EMPTY.writeTo(serializer);
-
     }
 
     @Override

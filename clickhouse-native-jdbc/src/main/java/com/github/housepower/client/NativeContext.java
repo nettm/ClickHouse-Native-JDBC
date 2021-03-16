@@ -17,12 +17,10 @@ package com.github.housepower.client;
 
 import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.protocol.Encodable;
-import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
 import java.time.ZoneId;
 
 public class NativeContext {
@@ -66,23 +64,6 @@ public class NativeContext {
             this.initialAddress = initialAddress;
         }
 
-        public void writeTo(BinarySerializer serializer) throws IOException {
-            serializer.writeVarInt(ClientContext.INITIAL_QUERY);
-            serializer.writeUTF8Binary("");
-            serializer.writeUTF8Binary("");
-            serializer.writeUTF8Binary(initialAddress);
-
-            // for TCP kind
-            serializer.writeVarInt(TCP_KINE);
-            serializer.writeUTF8Binary("");
-            serializer.writeUTF8Binary(clientHostname);
-            serializer.writeUTF8Binary(clientName);
-            serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
-            serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
-            serializer.writeVarInt(ClickHouseDefines.CLIENT_REVISION);
-            serializer.writeUTF8Binary("");
-        }
-
         @Override
         public void encode(ByteBuf buf) {
             writeVarInt(buf, ClientContext.INITIAL_QUERY);
@@ -91,6 +72,7 @@ public class NativeContext {
             writeUTF8Binary(buf, initialAddress);
             // for TCP kind
             writeVarInt(buf, TCP_KINE);
+            writeUTF8Binary(buf, "");
             writeUTF8Binary(buf, clientHostname);
             writeUTF8Binary(buf, clientName);
             writeVarInt(buf, ClickHouseDefines.MAJOR_VERSION);

@@ -14,15 +14,12 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.io.ColumnWriterBuffer;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.BlockSettings.Setting;
 import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.misc.NettyUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.Encodable;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -32,30 +29,7 @@ import java.util.Map;
 
 public class Block implements ByteBufHelper, Encodable {
 
-    private static final ByteBufHelper helper = new ByteBufHelper() {
-    };
-
-    @Deprecated
-    public static Block readFrom(BinaryDeserializer deserializer,
-                                 NativeContext.ServerContext serverContext) throws IOException, SQLException {
-        BlockSettings info = BlockSettings.readFrom(deserializer);
-
-        int columnCnt = (int) deserializer.readVarInt();
-        int rowCnt = (int) deserializer.readVarInt();
-
-        IColumn[] columns = new IColumn[columnCnt];
-
-        for (int i = 0; i < columnCnt; i++) {
-            String name = deserializer.readUTF8Binary();
-            String type = deserializer.readUTF8Binary();
-
-            IDataType dataType = DataTypeFactory.get(type, serverContext);
-            Object[] arr = dataType.deserializeBinaryBulk(rowCnt, deserializer);
-            columns[i] = ColumnFactory.createColumn(name, dataType, arr);
-        }
-
-        return new Block(rowCnt, columns, info);
-    }
+    private static final ByteBufHelper helper = ByteBufHelper.DEFAULT;
 
     public static Block readFrom(ByteBuf buf, NativeContext.ServerContext serverContext) {
         BlockSettings info = BlockSettings.readFrom(buf);
@@ -141,18 +115,6 @@ public class Block implements ByteBufHelper, Encodable {
         }
     }
 
-    @Deprecated
-    public void writeTo(BinarySerializer serializer) throws IOException, SQLException {
-        settings.writeTo(serializer);
-
-        serializer.writeVarInt(columns.length);
-        serializer.writeVarInt(rowCnt);
-
-        for (IColumn column : columns) {
-            column.flushToSerializer(serializer, true);
-        }
-    }
-
     @Override
     public void encode(ByteBuf buf) {
         settings.encode(buf);
@@ -188,7 +150,6 @@ public class Block implements ByteBufHelper, Encodable {
 
     public void initWriteBuffer() {
         for (IColumn column : columns) {
-            column.setColumnWriterBuffer(new ColumnWriterBuffer());
             column.setBuf(NettyUtil.alloc().buffer());
         }
     }

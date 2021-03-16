@@ -14,11 +14,9 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.io.ColumnWriterBuffer;
-import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.data.type.complex.DataTypeTuple;
+import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.misc.NettyUtil;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -48,24 +46,6 @@ public class ColumnTuple extends AbstractColumn {
     }
 
     @Override
-    public void flushToSerializer(BinarySerializer serializer, boolean now) throws SQLException, IOException {
-        if (isExported()) {
-            serializer.writeUTF8Binary(name);
-            serializer.writeUTF8Binary(type.name());
-        }
-
-        // we should to flush all the nested data to serializer
-        // because they are using separate buffers.
-        for (IColumn data : columnDataArray) {
-            data.flushToSerializer(serializer, true);
-        }
-
-        if (now) {
-            buffer.writeTo(serializer);
-        }
-    }
-
-    @Override
     public void flush(ByteBuf out, boolean flush) {
         if (isExported()) {
             writeUTF8Binary(out, name);
@@ -79,16 +59,7 @@ public class ColumnTuple extends AbstractColumn {
         }
 
         if (flush) {
-            buffer.encode(out);
-        }
-    }
-
-    @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
-        super.setColumnWriterBuffer(buffer);
-
-        for (IColumn data : columnDataArray) {
-            data.setColumnWriterBuffer(new ColumnWriterBuffer());
+            out.writeBytes(buf);
         }
     }
 

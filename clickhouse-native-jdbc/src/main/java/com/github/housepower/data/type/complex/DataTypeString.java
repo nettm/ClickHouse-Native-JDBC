@@ -73,7 +73,6 @@ public class DataTypeString implements IDataType<CharSequence, String>, ByteBufH
         return 0;
     }
 
-    @Override
     public void serializeBinary(CharSequence data, BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeStringBinary(data, charset);
     }
@@ -91,7 +90,6 @@ public class DataTypeString implements IDataType<CharSequence, String>, ByteBufH
      * deserializeBinary will always returns String
      * for getBytes(idx) method, we encode the String again
      */
-    @Override
     public CharSequence deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         ByteBuf buf = deserializer.readBytesBinary();
         return buf.readCharSequence(buf.readableBytes(), charset);
